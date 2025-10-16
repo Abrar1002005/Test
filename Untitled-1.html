@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Golden Star Hunt</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(to top, #ff9966, #ffcc66, #ffffcc); /* dynamic golden-hour sunset */
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  #message {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    font-size: 26px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 2px 2px 5px #000;
+  }
+  .star {
+    position: absolute;
+    width: 50px;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.3s;
+    filter: drop-shadow(0 0 5px gold);
+  }
+  #confetti {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="message">Click the golden stars! 🌟</div>
+<canvas id="confetti"></canvas>
+
+<script>
+const messages = [
+  "You're amazing! 💛",
+  "Shine like the golden hour 🌞",
+  "Birthday hugs! 🤗",
+  "Sweetest wishes for you! 🌸",
+  "Keep smiling, Sana! 😊",
+  "Twinkle, twinkle, birthday star! ✨"
+];
+
+let stars = [];
+const totalStars = 7; // more stars for fun
+const messageDiv = document.getElementById('message');
+const confetti = document.getElementById('confetti');
+const ctx = confetti.getContext('2d');
+confetti.width = window.innerWidth;
+confetti.height = window.innerHeight;
+
+// Colors for stars
+const starColors = ['#FFD700','#FF69B4','#FF8C00','#ADFF2F','#00BFFF','#FF4500','#FF1493'];
+
+// Create stars
+for (let i=0;i<totalStars;i++){
+  let star = document.createElement('div');
+  star.classList.add('star');
+  star.style.width = '50px';
+  star.style.height = '50px';
+  star.style.borderRadius = '50%';
+  star.style.background = starColors[i % starColors.length];
+  star.style.left = Math.random()*(window.innerWidth-50)+'px';
+  star.style.top = Math.random()*(window.innerHeight-50)+'px';
+  star.dataset.clicked = "false";
+  document.body.appendChild(star);
+  stars.push(star);
+}
+
+// Animate stars floating
+function animateStars(){
+  stars.forEach(star=>{
+    let x = parseFloat(star.style.left);
+    let y = parseFloat(star.style.top);
+    x += (Math.random()-0.5)*1.5;
+    y += (Math.random()-0.5)*1.5;
+    if (x<0) x=0; if(x>window.innerWidth-50)x=window.innerWidth-50;
+    if (y<0) y=0; if(y>window.innerHeight-50)y=window.innerHeight-50;
+    star.style.left = x+'px';
+    star.style.top = y+'px';
+    // Twinkle effect
+    star.style.opacity = 0.7 + Math.random()*0.3;
+  });
+  requestAnimationFrame(animateStars);
+}
+animateStars();
+
+// Click handler
+stars.forEach(star=>{
+  star.addEventListener('click',()=>{
+    if(star.dataset.clicked==="false"){
+      star.dataset.clicked="true";
+      let msg = messages[Math.floor(Math.random()*messages.length)];
+      messageDiv.textContent = msg;
+      star.style.transform="scale(1.8)";
+      star.style.filter="drop-shadow(0 0 15px white)";
+      setTimeout(()=>{
+        star.style.transform="scale(1)";
+        star.style.filter="drop-shadow(0 0 5px gold)";
+      },400);
+      checkWin();
+    }
+  });
+});
+
+// Check if all stars collected
+function checkWin(){
+  if(stars.every(s=>s.dataset.clicked==="true")){
+    messageDiv.textContent = "🎉 Happy Birthday Sana Cutu! 🎉";
+    startConfetti();
+  }
+}
+
+// Confetti animation
+let confettiParticles=[];
+function startConfetti(){
+  for(let i=0;i<300;i++){
+    confettiParticles.push({
+      x: Math.random()*window.innerWidth,
+      y: Math.random()*window.innerHeight,
+      dx: (Math.random()-0.5)*6,
+      dy: Math.random()*6+2,
+      color: starColors[Math.floor(Math.random()*starColors.length)],
+      size: Math.random()*8+4
+    });
+  }
+  requestAnimationFrame(confettiLoop);
+}
+function confettiLoop(){
+  ctx.clearRect(0,0,confetti.width,confetti.height);
+  confettiParticles.forEach(p=>{
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x,p.y,p.size,p.size);
+    p.x+=p.dx;
+    p.y+=p.dy;
+    if(p.y>window.innerHeight)p.y=0;
+    if(p.x>window.innerWidth)p.x=0;
+    if(p.x<0)p.x=window.innerWidth;
+  });
+  requestAnimationFrame(confettiLoop);
+}
+</script>
+</body>
+</html>
